@@ -11,7 +11,7 @@ export default function TagsMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = () => {
-    setIsOpen((prev) => !prev); // ----- "prev" and "!prev" it's previous and opposite of previous (true -> false)
+    setIsOpen((prev) => !prev);
   };
 
   return (

@@ -8,8 +8,8 @@ import css from "./Notes.module.css";
 import NoteList from "@/components/NoteList/NoteList";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBox from "@/components/SearchBox/SearchBox";
-import { fetchNotes } from "@/lib/api";
-import { FetchNotesResponse } from "@/lib/api";
+import { fetchNotes } from "@/lib/api/clientApi";
+import { FetchNotesResponse } from "@/lib/api/clientApi";
 import type { NoteTag } from "@/types/note";
 
 type NotesProps = {
@@ -49,11 +49,10 @@ function Notes({ tag }: NotesProps) {
         />
       )}
 
-      {data?.notes.length === 0 && <p>No notes found</p>}
-      
-      {data?.notes && data.notes.length > 0 && (
-        <NoteList notes={data.notes} />
-      )}
+     {data && data.notes?.length === 0 && (
+  <p className={css.noNotes}>No notes found</p>
+)}
+      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
     </div>
   );
 }
