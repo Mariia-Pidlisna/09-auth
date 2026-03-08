@@ -6,22 +6,17 @@ import { User } from "@/types/user";
 import { NoteTag } from "@/types/note";
 
 export const checkServerSession = async () => {
-  try {
-    const cookieStore = await cookies();
-    const res = await nextServer.get("/auth/session", {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-
-    return {
-      data: res.data,
-      setCookie: res.headers["set-cookie"],
-    };
-  } catch (error) {
-    return null;
-  }
+  const cookieStore = await cookies();
+  
+  const response = await nextServer.get("/auth/session", {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  
+  return response; 
 };
+
 
 export const getMeServer = async () => {
   const cookieStore = await cookies();

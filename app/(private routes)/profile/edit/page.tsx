@@ -1,9 +1,9 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import css from "./EditProfilePage.module.css";
 import Image from "next/image";
-import { updateMe, getMe } from "@/lib/api/clientApi";
-import { useEffect, useState } from "react";
+import { updateMe } from "@/lib/api/clientApi";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -14,22 +14,20 @@ type UpdateUserData = {
 };
 
 const EditProfile = () => {
-  const setUser = useAuthUserStore((state) => state.setUser);
+  const router = useRouter();
+  const { user, setUser } = useAuthUserStore();
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
-
-  const router = useRouter();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    getMe().then((user) => {
+    if (user) {
       setUserName(user.username ?? "");
-      setUserEmail(user.email);
-      setUserAvatar(user.avatar);
-    });
-  }, []);
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+      setUserEmail(user.email ?? "");
+      setUserAvatar(user.avatar ?? null);
+    }
+  }, [user]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: UpdateUserData) => updateMe(data),
@@ -43,21 +41,26 @@ const EditProfile = () => {
     },
   });
 
-  const validate = () => {
+  const validate = (name: string) => {
     const newErrors: typeof errors = {};
-    if (userName.trim().length < 3) {
+    if (name.trim().length < 3) {
       newErrors.userName = "Minimum 3 characters";
     }
-    if (userName.length > 50) {
+    if (name.length > 50) {
       newErrors.userName = "Maximum 50 characters";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (!validate()) return;
-    mutate({ username: userName });
+  const handleSubmit = (formData: FormData) => {
+    const name = formData.get("username") as string;
+    if (!validate(name)) return;
+    mutate({ username: name });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserName(e.target.value);
   };
 
   const handleCancel = () => router.push("/profile");
@@ -81,7 +84,8 @@ const EditProfile = () => {
           <div className={css.usernameWrapper}>
             <label htmlFor="username">Username:</label>
             <input
-              onChange={(e) => setUserName(e.target.value)}
+              name="username" 
+              onChange={handleInputChange}
               value={userName}
               id="username"
               type="text"
@@ -100,7 +104,7 @@ const EditProfile = () => {
               type="submit"
               className={css.saveButton}
             >
-              Save
+              {isPending ? "Saving..." : "Save"}
             </button>
             <button
               onClick={handleCancel}

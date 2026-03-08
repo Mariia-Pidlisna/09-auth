@@ -13,13 +13,18 @@ export async function proxy(request: NextRequest) {
   let isAuthenticated = !!accessToken;
   let newCookies: string[] | undefined;
 
-  if (!accessToken && refreshToken) {
-    const session = await checkServerSession();
-    if (session && session.data) {
+ if (!accessToken && refreshToken) {
+  try {
+    const sessionResponse = await checkServerSession();
+    
+    if (sessionResponse.data?.success) {
       isAuthenticated = true;
-      newCookies = session.setCookie; 
+      newCookies = sessionResponse.headers["set-cookie"]; 
     }
+  } catch (error) {
+    isAuthenticated = false;
   }
+}
 
   let response = NextResponse.next();
 
