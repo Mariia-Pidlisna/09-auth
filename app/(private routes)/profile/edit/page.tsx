@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useAuthUserStore } from "@/lib/store/authStore";
 
 type UpdateUserData = {
   username: string;
 };
 
 const EditProfile = () => {
+  const setUser = useAuthUserStore((state) => state.setUser);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
@@ -31,7 +33,8 @@ const EditProfile = () => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: UpdateUserData) => updateMe(data),
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      setUser(updatedUser);
       toast.success("Profile updated successfully");
       router.push("/profile");
     },

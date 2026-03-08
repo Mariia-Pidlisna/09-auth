@@ -42,14 +42,14 @@ export async function logout(): Promise<LogoutResponse> {
   return response.data;
 }
 
-type CheckSessionRequest = {
+type CheckSessionResponse = {
   success: boolean;
 };
 
 export const checkSession = async () => {
   try {
-    const response = await nextServer.get<User>("/users/me");
-    return !!response.data;
+    const response = await nextServer.get<CheckSessionResponse>("/auth/session");
+    return response.data.success;
   } catch (error) {
     return false;
   }
